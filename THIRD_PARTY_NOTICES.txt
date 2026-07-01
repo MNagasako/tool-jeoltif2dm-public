@@ -1,0 +1,204 @@
+J2DM Third-Party Software Notices
+==================================
+
+This application bundles the following third-party software components.
+Each component is used under the terms of its respective license.
+
+-------------------------------------------------------------------------------
+Python (CPython)
+License : Python Software Foundation License (PSF) Version 2
+URL     : https://www.python.org
+-------------------------------------------------------------------------------
+Copyright (c) 2001-2025 Python Software Foundation. All Rights Reserved.
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appears in all copies of this
+software.  PYTHON SOFTWARE FOUNDATION DISCLAIMS ALL WARRANTIES WITH REGARD
+TO THIS SOFTWARE.
+
+(Full license: https://docs.python.org/3/license.html)
+
+-------------------------------------------------------------------------------
+Tcl/Tk  [bundled within Python]
+License : Tcl/Tk License (BSD-style)
+URL     : https://www.tcl.tk
+-------------------------------------------------------------------------------
+Copyright (c) 1987-1994 The Regents of the University of California.
+Copyright (c) 1994-1995 Sun Microsystems, Inc.
+Copyright (c) 1997-1999 Scriptics Corporation.
+
+This software is copyrighted by the Regents of the University of California,
+Sun Microsystems, Inc., and other parties. Redistribution and use in source
+and binary forms, with or without modification, are permitted provided that
+the copyright notice and this permission notice appear.
+
+-------------------------------------------------------------------------------
+NumPy
+License : BSD 3-Clause
+URL     : https://numpy.org
+-------------------------------------------------------------------------------
+Copyright (c) 2005-2025, NumPy Developers. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright notice,
+    this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+  * Neither the name of the NumPy Developers nor the names of any
+    contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES ARE DISCLAIMED.
+
+-------------------------------------------------------------------------------
+tifffile
+License : BSD 3-Clause
+URL     : https://github.com/cgohlke/tifffile
+-------------------------------------------------------------------------------
+Copyright (c) 2008-2026, Christoph Gohlke. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES
+ARE DISCLAIMED.
+
+-------------------------------------------------------------------------------
+Pillow (PIL Fork)
+License : MIT-CMU License (HPND)
+URL     : https://python-pillow.org
+-------------------------------------------------------------------------------
+The Python Imaging Library (PIL) is
+    Copyright (c) 1997-2011 by Secret Labs AB
+    Copyright (c) 1995-2011 by Fredrik Lundh and contributors
+
+Pillow is the friendly PIL fork. It is
+    Copyright (c) 2010 by Jeffrey 'Alex' Clark and contributors
+
+Like PIL, Pillow is licensed under the open source MIT-CMU License:
+
+Permission to use, copy, modify and distribute this software and its
+documentation for any purpose and without fee is hereby granted, provided
+that the above copyright notice appears in all copies, and that both that
+copyright notice and this permission notice appear in supporting
+documentation, and that the name of Secret Labs AB or the author not be
+used in advertising or publicity pertaining to distribution of the software
+without specific, written prior permission.
+
+-------------------------------------------------------------------------------
+FreeType  [bundled within Pillow]
+License : The FreeType Project License (FTL)
+URL     : https://freetype.org
+-------------------------------------------------------------------------------
+Portions of this software are copyright (c) 2024 The FreeType Project
+(https://freetype.org). All rights reserved.
+
+This product uses the FreeType software, which is copyrighted by:
+    David Turner, Robert Wilhelm, and Werner Lemberg.
+
+Redistribution in binary form must provide a disclaimer that states that
+the software is based in part on the work of the FreeType Team, in the
+distribution documentation.
+
+-------------------------------------------------------------------------------
+libjpeg-turbo / Independent JPEG Group  [bundled within Pillow]
+License : IJG License + Modified (3-clause) BSD
+URL     : https://libjpeg-turbo.org
+-------------------------------------------------------------------------------
+This software is based in part on the work of the Independent JPEG Group.
+
+libjpeg-turbo:
+    Copyright (C) 2009-2026 D. R. Commander. All Rights Reserved.
+    Copyright (C) 2015 Viktor Szathmary. All Rights Reserved.
+
+Original libjpeg code:
+    This software is copyright (C) 1991-2020, Thomas G. Lane, Guido Vollbeding.
+    All Rights Reserved.
+
+-------------------------------------------------------------------------------
+HarfBuzz  [bundled within Pillow]
+License : MIT ("Old MIT")
+URL     : https://harfbuzz.github.io
+-------------------------------------------------------------------------------
+Copyright (c) 2010-2022 Google, Inc.
+Copyright (c) 2015-2020 Ebrahim Byagowi
+Copyright (c) 2019,2020 Facebook, Inc.
+Copyright (c) 2012,2015 Mozilla Foundation
+Copyright (c) 2004,2007,2008,2009,2010,2013,2021,2022,2023 Red Hat, Inc.
+Copyright (c) 2005,2006,2020,2021,2022,2023 Behdad Esfahbod
+
+Permission is hereby granted, without written agreement and without license
+or royalty fees, to use, copy, modify, and distribute this software and its
+documentation for any purpose.
+
+-------------------------------------------------------------------------------
+Little CMS (lcms2)  [bundled within Pillow]
+License : MIT
+URL     : https://www.littlecms.com
+-------------------------------------------------------------------------------
+Copyright (c) 2023 Marti Maria Saguer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction.
+
+-------------------------------------------------------------------------------
+libpng  [bundled within Pillow]
+License : libpng License (PNG Reference Library License v2)
+URL     : http://www.libpng.org
+-------------------------------------------------------------------------------
+Copyright (c) 1995-2026 The PNG Reference Library Authors.
+Copyright (c) 2018-2026 Cosmin Truta.
+Copyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson.
+
+The software is supplied "as is", without warranty of any kind.
+Permission is hereby granted to use, copy, modify, and distribute this
+software, or portions hereof, for any purpose, without fee, subject to
+the restrictions listed in the full license text.
+
+-------------------------------------------------------------------------------
+libwebp  [bundled within Pillow]
+License : BSD 3-Clause
+URL     : https://chromium.googlesource.com/webm/libwebp
+-------------------------------------------------------------------------------
+Copyright (c) 2010, Google Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the conditions of the BSD
+3-Clause License are met (copyright notice and disclaimer in documentation
+and/or other materials provided with the distribution).
+
+-------------------------------------------------------------------------------
+windnd
+License : MIT
+URL     : https://pypi.org/project/windnd/
+-------------------------------------------------------------------------------
+Copyright (c) 2018 itomato
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+
+-------------------------------------------------------------------------------
