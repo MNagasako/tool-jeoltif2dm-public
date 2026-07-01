@@ -15,7 +15,26 @@ JEOL SightSky TIFF画像(JEOL独自のXMLメタデータが埋め込まれたTIF
 
 ### 使用方法
 
-**Pythonスクリプトとして実行する場合**
+**GUIで使う場合(通常はこちら — `.exe` をダブルクリックするだけ)**
+
+[Releases](../../releases) から最新の `.exe` をダウンロードし、Windows Explorer上でそのままダブルクリックして
+起動すると、常駐型のGUIウィンドウが開きます。コマンドラインは不要で、ほとんどの方はこの方法で使うことに
+なります。
+
+![J2DMメイン画面](assets/screenshot_main_ja.png)
+
+- `.tif` / `.tiff` ファイルやフォルダをドロップ欄にドラッグ&ドロップするか、**参照...** ボタンからファイルを
+  選択します。**ファイルリスト確認** で現在キューに入っているファイルを確認・編集できます。
+- 出力フォーマット(**DM3** / **DM4** / **PNG** / **JPG**)と各種オプション(スケールバー・バーサイズ/
+  フォントサイズ・アノテーション/マーカー・拡張メタデータ)を必要に応じて切り替えます。
+- **変換開始** をクリックするとバッチ変換が実行されます。完了後、サマリー画面と `J2DM_conversion_log.txt`
+  (最初のファイルと同じフォルダに出力)が生成されます。
+- **USAGE**・**ABOUT** ボタンからアプリ内のヘルプ・サードパーティライセンス情報を確認できます。右上の
+  日本語/Englishボタンでいつでも表示言語を切り替えられます。
+
+**コマンドラインで使う場合**
+
+Pythonがインストール済みであれば、スクリプトを直接実行することもできます:
 
 ```bash
 # ファイルを1つ変換
@@ -25,15 +44,14 @@ python convert_jeol_to_dm.py /path/to/image.tif
 python convert_jeol_to_dm.py /path/to/image1.tif /path/to/a_directory /path/to/image2.tif --format dm4 --markers --metadata
 ```
 
-**スタンドアロン実行ファイルとして実行する場合**
-
-[Releases](../../releases) から最新の `.exe` をダウンロードしてください。Python本体・依存ライブラリ・バイナリテンプレートを同梱しているため、変換先のマシンに別途Pythonをインストールする必要はありません。
+コンパイル済みバイナリも同じフラグを受け付けます(GUIを介さないスクリプト・バッチ処理向け):
 
 ```bash
 .\J2DM-vX.Y.Z.exe C:\path\to\image.tif --format dm4 --markers --metadata
 ```
 
-`.tif` ファイルやフォルダをWindows Explorer上で `.exe` に直接ドラッグ&ドロップして実行することもできます。この場合(コマンドラインオプション未指定時)は、出力形式やマーカー/メタデータ付与の有無を選べる簡易ポップアップが表示され、変換完了後にサマリー画面と `J2DM_conversion_log.txt`(最初にドロップしたファイルと同じフォルダに出力)が生成されます。
+`.tif` ファイルやフォルダを(引数無しで起動する代わりに)`.exe` へ直接ドラッグ&ドロップした場合も、ドロップした
+内容が反映済みの同じGUIが開き、そのまま変換に進めます。
 
 ### ビルド方法
 
@@ -75,7 +93,25 @@ Converts JEOL SightSky TIFF images (which embed JEOL's own XML metadata) into Ga
 
 ### Usage
 
-**Running the Python script**
+**Using the GUI (the usual way — just double-click the `.exe`)**
+
+Download the latest `.exe` from [Releases](../../releases) and double-click it in Windows Explorer to open a
+persistent GUI window — no command line required. This is how most people will use the tool.
+
+![J2DM main window](assets/screenshot_main_en.png)
+
+- Drag and drop one or more `.tif`/`.tiff` files and/or whole folders onto the drop zone, or click **Browse...**
+  to pick them from a file dialog; **File List** shows/edits everything currently queued.
+- Choose the output format (**DM3** / **DM4** / **PNG** / **JPG**) and toggle the options (scale bar, size/font
+  scale, markers/annotations, extended metadata) to match what you need.
+- Click **Convert** to run the batch. A completion summary and a `J2DM_conversion_log.txt` log (written next to
+  the first source file) follow once it finishes.
+- **USAGE** and **ABOUT** open in-app help and third-party license info. The 日本語/English button in the top
+  right toggles the UI language at any time.
+
+**Using the command line**
+
+If you have Python installed, you can also run the script directly:
 
 ```bash
 # Convert a single file
@@ -85,15 +121,14 @@ python convert_jeol_to_dm.py /path/to/image.tif
 python convert_jeol_to_dm.py /path/to/image1.tif /path/to/a_directory /path/to/image2.tif --format dm4 --markers --metadata
 ```
 
-**Running the standalone binary**
-
-Download the latest `.exe` from [Releases](../../releases). It bundles the Python runtime, dependencies, and binary templates, so no separate Python install is required on the target machine.
+The compiled binary accepts the same flags (useful for scripting/batch jobs where you don't want the GUI):
 
 ```bash
 .\J2DM-vX.Y.Z.exe C:\path\to\image.tif --format dm4 --markers --metadata
 ```
 
-You can also drag-and-drop one or more `.tif` files and/or whole folders onto the `.exe` in Windows Explorer. When started this way (i.e. with no command-line flags), a small popup asks for the desired output format and options before converting; a completion summary and a `J2DM_conversion_log.txt` log (written next to the first dropped file) follow once the batch finishes.
+Dropping files/folders directly onto the `.exe` (instead of double-clicking it with no arguments) opens the
+same GUI pre-populated with what you dropped, ready to convert.
 
 ### Building from Source
 

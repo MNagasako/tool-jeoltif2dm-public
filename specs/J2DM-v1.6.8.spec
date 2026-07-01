@@ -29,7 +29,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='J2DM-v1.6.7',
+    name='J2DM-v1.6.8',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

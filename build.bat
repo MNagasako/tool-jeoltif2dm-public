@@ -1,6 +1,6 @@
 @echo off
 echo ==============================================
-echo Building J2DM v1.6.7
+echo Building J2DM v1.6.8
 echo ==============================================
 
 echo [1] Checking for python...
@@ -27,7 +27,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo [5] Running PyInstaller...
-set "SPEC_FILE=specs\J2DM-v1.6.7.spec"
+set "SPEC_FILE=specs\J2DM-v1.6.8.spec"
 echo Compiling the executable...
 pyinstaller --noconfirm "%SPEC_FILE%"
 
