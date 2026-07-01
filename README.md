@@ -1,5 +1,15 @@
 # J2DM — JEOL TIF to DM3/DM4 Converter
 
+> **免責事項:** 本ソフトウェアは無保証で提供されます。本ソフトウェアの使用によって生じたいかなる損害・データの
+> 損失・機器の不具合等についても、作者は一切の責任を負いません。「JEOL」「SightSky」「Gatan」
+> 「DigitalMicrograph」は各社の商標です。本プロジェクトはJEOL株式会社およびGatan, Inc.(AMETEK)のいずれとも
+> 提携・承認関係にはありません。
+>
+> **Disclaimer:** This software is provided WITHOUT ANY WARRANTY. The author assumes no responsibility for any
+> damage, data loss, or equipment malfunction arising from its use. "JEOL", "SightSky", "Gatan", and
+> "DigitalMicrograph" are trademarks of their respective owners; this project is not affiliated with or endorsed
+> by JEOL Ltd. or Gatan, Inc. (AMETEK).
+
 [日本語](#日本語) ・ [English](#english)
 
 このリポジトリには、[Releases](../../releases) で公開しているビルド済み `.exe` に対応する、ビルドに必要な最小限のソースを配置しています。アーキテクチャなど詳細な技術情報は [NOTES.md](NOTES.md) をご覧ください。

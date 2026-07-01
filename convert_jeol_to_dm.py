@@ -20,7 +20,7 @@ except ImportError:
     _HAS_WINDND = False
 
 APP_NAME    = "J2DM"
-APP_VERSION = "1.6.8"
+APP_VERSION = "1.6.9"
 APP_SUBTITLE = "JEOL SightSky TIFF to Gatan DM3/DM4 Converter"
 GITHUB_URL  = "https://github.com/MNagasako/tool-jeoltif2dm-public"
 
