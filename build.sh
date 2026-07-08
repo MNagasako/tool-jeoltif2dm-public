@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "=============================================="
-echo "Building J2DM v1.6.9"
+echo "Building J2DM v1.6.10"
 echo "=============================================="
 
 echo "[1] Checking for python3..."
@@ -23,7 +23,7 @@ echo "[4] Generating icon..."
 python3 assets/generate_icon.py || echo "[WARNING] Icon generation failed - building without icon."
 
 echo "[5] Running PyInstaller..."
-pyinstaller --noconfirm specs/J2DM-v1.6.9.spec
+pyinstaller --noconfirm specs/J2DM-v1.6.10.spec
 
 echo "[6] Cleaning up build files..."
 rm -rf build

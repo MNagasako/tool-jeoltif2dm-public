@@ -20,7 +20,7 @@ except ImportError:
     _HAS_WINDND = False
 
 APP_NAME    = "J2DM"
-APP_VERSION = "1.6.9"
+APP_VERSION = "1.6.10"
 APP_SUBTITLE = "JEOL SightSky TIFF to Gatan DM3/DM4 Converter"
 GITHUB_URL  = "https://github.com/MNagasako/tool-jeoltif2dm-public"
 
@@ -166,6 +166,34 @@ def clean_xml(xml_data):
     cleaned = re.sub(r' [a-zA-Z0-9]+:[a-zA-Z0-9]+="[^"]*"', '', cleaned)
     return cleaned
 
+def _find_micronbar_pixel_size(root):
+    """Derive pixel_size from SightX's own scale-bar measurement:
+    MicronbarValue (the number SightX displays) divided by the
+    MicronbarRectangleReporter annotation's on-canvas pixel width. Returns None if
+    either value is missing or not physically valid (<=0), so callers can fall back
+    to LengthPerPixel/GratingSpacePerPixel."""
+    value_node = root.find('.//MicronbarValue')
+    if value_node is None or not value_node.text:
+        return None
+    try:
+        value = float(value_node.text)
+    except ValueError:
+        return None
+    if value <= 0:
+        return None
+    for anno in root.findall('.//AnnotationReporter'):
+        if anno.get('AnnoType') == 'MicronbarRectangleReporter':
+            w_node = anno.find('./BorderSize/width')
+            if w_node is not None and w_node.text:
+                try:
+                    width = float(w_node.text)
+                except ValueError:
+                    continue
+                if width > 0:
+                    return value / width
+            break
+    return None
+
 def extract_metadata(xml_data, img_shape=None):
     """
     Extract relevant JEOL metadata and annotations from the XML string.
@@ -217,6 +245,17 @@ def extract_metadata(xml_data, img_shape=None):
         grating_node = root.find('.//GratingSpacePerPixel')
         if grating_node is not None and grating_node.text and float(grating_node.text) > 0:
             metadata['pixel_size'] = 1.0 / float(grating_node.text)
+
+    # 1b. Prefer SightX's own rendered scale-bar measurement over LengthPerPixel/
+    # GratingSpacePerPixel when available. Verified against real acquisitions (camera
+    # length 8/12/20/30/50/80cm at 160kV) that GratingSpacePerPixel can be wrong by a
+    # consistent ~64x factor for some acquisition conditions while being correct for
+    # others (25cm/200kV) - a real JEOL/SightX metadata inconsistency. MicronbarValue/
+    # BorderSize.width is the exact number SightX itself used to draw its own scale
+    # bar, so it can't disagree with what the user sees there.
+    micronbar_pixel_size = _find_micronbar_pixel_size(root)
+    if micronbar_pixel_size is not None:
+        metadata['pixel_size'] = micronbar_pixel_size
 
     # 2. Voltage
     volt_node = root.find('.//MeasurementReporter/AccVoltage')
