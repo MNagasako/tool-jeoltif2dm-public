@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import re
+import xml.etree.ElementTree as ET
 import tkinter as tk
 from tkinter import messagebox, filedialog, scrolledtext, ttk
 import threading
@@ -20,7 +21,7 @@ except ImportError:
     _HAS_WINDND = False
 
 APP_NAME    = "J2DM"
-APP_VERSION = "1.6.10"
+APP_VERSION = "1.6.11"
 APP_SUBTITLE = "JEOL SightSky TIFF to Gatan DM3/DM4 Converter"
 GITHUB_URL  = "https://github.com/MNagasako/tool-jeoltif2dm-public"
 
@@ -36,6 +37,13 @@ STRINGS = {
         'count_label':    "Queued: {n} file(s)",
         'browse':         "Browse...",
         'file_list_btn':  "File List",
+        'metadata_btn':   "View Metadata",
+        'metadata_title': "JEOL Metadata — {name}",
+        'metadata_none':  "[No Tag 270 metadata found in this TIFF]",
+        'metadata_err':   "[Error reading file: {err}]",
+        'save_btn':       "Save...",
+        'save_all_btn':   "Save All...",
+        'save_all_result': "Saved {ok} of {total} file(s) to:\n{dir}",
         'output_format':  "Output Format",
         'options':        "Options",
         'scalebar_cb':    "Add scale bar  (PNG/JPG: burned into image)",
@@ -86,6 +94,13 @@ STRINGS = {
         'count_label':    "追加済み: {n} 件",
         'browse':         "参照...",
         'file_list_btn':  "ファイルリスト確認",
+        'metadata_btn':   "メタデータを見る",
+        'metadata_title': "JEOLメタデータ — {name}",
+        'metadata_none':  "[このTIFFにはTag 270メタデータが見つかりません]",
+        'metadata_err':   "[ファイル読み込みエラー: {err}]",
+        'save_btn':       "保存...",
+        'save_all_btn':   "すべて保存...",
+        'save_all_result': "{total} 件中 {ok} 件を保存しました:\n{dir}",
         'output_format':  "出力フォーマット",
         'options':        "オプション",
         'scalebar_cb':    "スケールバーを追加  (PNG/JPG は画像内に焼き付け)",
@@ -639,6 +654,83 @@ def extract_metadata(xml_data, img_shape=None):
 
     return metadata
 
+def format_metadata_tree(elem, indent=0):
+    """
+    Render an XML Element and all its descendants as an indented plain-text tree, one
+    line per element ('TagName [attr="val"]: text' for a leaf with text, 'TagName
+    [attr="val"]' otherwise). Unlike extract_metadata() above - which only pulls out
+    the specific fields needed for DM3/DM4 conversion (pixel size, voltage, mag,
+    annotations, ...) - this walks every field JEOL wrote into Tag 270, so it's used
+    to give users full visibility into metadata that conversion itself never touches.
+    Returns a list of lines; join with '\\n' to display.
+    """
+    lines = []
+    pad = '  ' * indent
+    attrs = ' '.join(f'{k}="{v}"' for k, v in elem.attrib.items())
+    attr_str = f' [{attrs}]' if attrs else ''
+    text = (elem.text or '').strip()
+    children = list(elem)
+    if children:
+        lines.append(f'{pad}{elem.tag}{attr_str}')
+        for child in children:
+            lines.extend(format_metadata_tree(child, indent + 1))
+    elif text:
+        lines.append(f'{pad}{elem.tag}{attr_str}: {text}')
+    else:
+        lines.append(f'{pad}{elem.tag}{attr_str}')
+    return lines
+
+def get_full_metadata_text(tif_path):
+    """
+    Read Tag 270 (ImageDescription) from a JEOL TIFF and render every field it
+    contains as an indented text tree via format_metadata_tree() - the complete
+    document, not the curated subset extract_metadata() maps into conversion fields.
+    Returns (tree_text, cleaned_xml) on success, or (None, None) if the file has no
+    Tag 270 at all. Malformed XML is reported inline in tree_text rather than raised,
+    so callers (CLI printing, GUI viewer) don't need their own try/except.
+    """
+    with tifffile.TiffFile(tif_path) as tif:
+        page = tif.pages[0]
+        tags = page.tags
+        if 270 not in tags:
+            return None, None
+        xml_data = read_tag270_text(tif, tags[270])
+    cleaned = clean_xml(xml_data)
+    try:
+        root = ET.fromstring(cleaned)
+        tree_text = '\n'.join(format_metadata_tree(root))
+    except ET.ParseError as e:
+        tree_text = f'[XML Parse Error: {e}]\n\n{cleaned}'
+    return tree_text, cleaned
+
+def export_metadata_text(files, out_dir=None):
+    """
+    Write get_full_metadata_text()'s formatted tree for each of `files` out to its own
+    '<basename>_metadata.txt' - into `out_dir` if given (created if missing), or next
+    to each source TIFF otherwise. Used by both the CLI (--show-metadata/--metadata-out)
+    and the GUI Metadata Viewer's "Save All" button, so both share one file-naming and
+    error-handling path. Returns a list of (src_path, out_path_or_None, error_or_None)
+    in input order; a per-file exception is captured here rather than raised, so one
+    unreadable file in a batch doesn't abort the rest.
+    """
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    results = []
+    for f in files:
+        try:
+            tree_text, _raw = get_full_metadata_text(f)
+            if tree_text is None:
+                results.append((f, None, "No Tag 270 metadata found in this TIFF"))
+                continue
+            dest_dir = out_dir if out_dir else os.path.dirname(os.path.abspath(f))
+            out_path = os.path.join(dest_dir, os.path.splitext(os.path.basename(f))[0] + "_metadata.txt")
+            with open(out_path, "w", encoding="utf-8") as fh:
+                fh.write(tree_text)
+            results.append((f, out_path, None))
+        except Exception as e:
+            results.append((f, None, str(e)))
+    return results
+
 def compute_contrast_limits(image_data, contrast_info):
     """
     Derive the (LowLimit, HighLimit) display-range values GMS should use, matching what
@@ -943,6 +1035,94 @@ def show_file_list_dialog(parent, files):
     tk.Button(top, text=_t('close_btn'), command=top.destroy, width=10).pack(pady=(0, 8))
     _center_near(top, *_win_center(parent))
 
+def show_metadata_dialog(parent, files):
+    """
+    Metadata Viewer: lets the user pick one of the queued TIF files from a list and
+    see every field JEOL embedded in its Tag 270 XML (get_full_metadata_text()) -
+    not just the subset extract_metadata() curates for DM3/DM4 conversion. Purely a
+    read/inspect feature; it never touches the conversion pipeline.
+    """
+    top = tk.Toplevel(parent)
+    top.title(_t('metadata_title', name=f'{len(files)} file(s)'))
+    top.geometry("860x520")
+    top.resizable(True, True)
+
+    paned = tk.PanedWindow(top, orient=tk.HORIZONTAL, sashwidth=4)
+    paned.pack(fill="both", expand=True, padx=8, pady=(8, 4))
+
+    left = tk.Frame(paned)
+    listbox = tk.Listbox(left, exportselection=False)
+    lb_scroll = tk.Scrollbar(left, command=listbox.yview)
+    listbox.config(yscrollcommand=lb_scroll.set)
+    listbox.pack(side="left", fill="both", expand=True)
+    lb_scroll.pack(side="right", fill="y")
+    for f in files:
+        listbox.insert("end", os.path.basename(f))
+    paned.add(left, minsize=200, width=220)
+
+    right = tk.Frame(paned)
+    st = scrolledtext.ScrolledText(right, wrap=tk.NONE, font=("Courier", 9))
+    st.pack(fill="both", expand=True)
+    paned.add(right, minsize=400)
+
+    cache = {}
+
+    def _display(idx):
+        f = files[idx]
+        if f not in cache:
+            try:
+                tree_text, _raw = get_full_metadata_text(f)
+                cache[f] = tree_text if tree_text is not None else _t('metadata_none')
+            except Exception as e:
+                cache[f] = _t('metadata_err', err=e)
+        st.configure(state="normal")
+        st.delete("1.0", "end")
+        st.insert("1.0", cache[f])
+        st.configure(state="disabled")
+
+    def _on_select(_evt=None):
+        sel = listbox.curselection()
+        if sel:
+            _display(sel[0])
+
+    listbox.bind("<<ListboxSelect>>", _on_select)
+
+    def _save_current():
+        sel = listbox.curselection()
+        if not sel:
+            return
+        f = files[sel[0]]
+        default_name = os.path.splitext(os.path.basename(f))[0] + "_metadata.txt"
+        out_path = filedialog.asksaveasfilename(
+            parent=top, initialfile=default_name, defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if out_path:
+            with open(out_path, "w", encoding="utf-8") as fh:
+                fh.write(cache.get(f, ""))
+
+    def _save_all():
+        out_dir = filedialog.askdirectory(parent=top, title=_t('save_all_btn'))
+        if not out_dir:
+            return
+        results = export_metadata_text(files, out_dir=out_dir)
+        ok = sum(1 for _f, out_path, _err in results if out_path)
+        failed = [(os.path.basename(f), err) for f, out_path, err in results if not out_path]
+        msg = _t('save_all_result', ok=ok, total=len(results), dir=out_dir)
+        if failed:
+            msg += "\n\n" + "\n".join(f"{name}: {err}" for name, err in failed)
+        messagebox.showinfo(APP_NAME, msg, parent=top)
+
+    btn_frame = tk.Frame(top)
+    btn_frame.pack(pady=(0, 8))
+    tk.Button(btn_frame, text=_t('save_btn'), command=_save_current, width=10).pack(side="left", padx=4)
+    tk.Button(btn_frame, text=_t('save_all_btn'), command=_save_all, width=12).pack(side="left", padx=4)
+    tk.Button(btn_frame, text=_t('close_btn'), command=top.destroy, width=10).pack(side="left", padx=4)
+
+    _center_near(top, *_win_center(parent))
+    if files:
+        listbox.selection_set(0)
+        _display(0)
+
 def _get_bundled_path(filename):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, filename)
@@ -999,6 +1179,7 @@ def show_launcher_dialog(initial_files=None, parser=None):
     sv_count     = tk.StringVar()
     sv_browse    = tk.StringVar()
     sv_filelist  = tk.StringVar()
+    sv_metadata_btn = tk.StringVar()
     sv_scalebar  = tk.StringVar()
     sv_bar_lbl   = tk.StringVar()
     sv_font_lbl  = tk.StringVar()
@@ -1049,6 +1230,16 @@ def show_launcher_dialog(initial_files=None, parser=None):
     tk.Button(row_count, textvariable=sv_filelist,
               command=lambda: show_file_list_dialog(root, collect_tif_files(queued)),
               width=14).pack(side="right")
+
+    def _open_metadata_viewer():
+        files = collect_tif_files(queued)
+        if not files:
+            messagebox.showwarning(APP_NAME, _t('no_files'), parent=root)
+            return
+        show_metadata_dialog(root, files)
+
+    tk.Button(row_count, textvariable=sv_metadata_btn,
+              command=_open_metadata_viewer, width=14).pack(side="right", padx=(0, 4))
 
     # ── Format selector ──────────────────────────────────────────
     fmt_frame = tk.LabelFrame(root, padx=8, pady=4)
@@ -1139,6 +1330,7 @@ def show_launcher_dialog(initial_files=None, parser=None):
         sv_count.set(_t('count_label', n=n))
         sv_browse.set(_t('browse'))
         sv_filelist.set(_t('file_list_btn'))
+        sv_metadata_btn.set(_t('metadata_btn'))
         fmt_frame.config(text=_t('output_format'))
         opt_frame.config(text=_t('options'))
         sv_scalebar.set(_t('scalebar_cb'))
@@ -1477,10 +1669,19 @@ if __name__ == "__main__":
     parser.add_argument("--scalebar", action="store_true", help="Enable scale bar (DM3/DM4: annotation; PNG/JPG: burned into image)")
     parser.add_argument("--markers", action="store_true", help="Enable marker/annotation extraction (DM3/DM4 only)")
     parser.add_argument("--metadata", action="store_true", help="Extract and include extended microscope metadata (DM3/DM4 only)")
+    parser.add_argument("--show-metadata", action="store_true",
+                         help="Print every field found in the JEOL Tag 270 XML metadata for the given input file(s) "
+                              "(not just the subset used for conversion), then exit without converting")
+    parser.add_argument("--metadata-out", metavar="DIR",
+                         help="With --show-metadata, also (or instead - see below) write each file's formatted "
+                              "metadata as '<name>_metadata.txt' into DIR (created if missing) rather than only "
+                              "printing it. Implies --show-metadata.")
     parser.add_argument("--version", action="version", version=f"{APP_NAME} {APP_VERSION}")
 
     # Explicit option flags used by scripted/E2E invocations bypass the GUI dialog.
-    explicit_flags = any(flag in sys.argv for flag in ('--format', '--markers', '--metadata', '--scalebar', '--output'))
+    explicit_flags = any(flag in sys.argv for flag in
+                          ('--format', '--markers', '--metadata', '--scalebar', '--output',
+                           '--show-metadata', '--metadata-out'))
 
     if len(sys.argv) == 1 or (not explicit_flags and not any(a for a in sys.argv[1:] if not a.startswith('-'))):
         # No files and no flags: show the launcher dialog for interactive use.
@@ -1500,6 +1701,39 @@ if __name__ == "__main__":
         if not files:
             print("No .tif/.tiff files found in the given path(s).")
             sys.exit(1)
+
+        if args.show_metadata or args.metadata_out:
+            # JEOL metadata routinely contains characters (µ, superscripts, Japanese
+            # text) outside the Windows console's active codepage (e.g. cp932); a
+            # plain print() then raises UnicodeEncodeError and aborts the whole dump.
+            # Fall back to replacing only the unencodable characters so the rest of
+            # the output still reaches the user.
+            def _print_safe(text):
+                try:
+                    print(text)
+                except UnicodeEncodeError:
+                    enc = sys.stdout.encoding or 'utf-8'
+                    print(text.encode(enc, errors='replace').decode(enc))
+
+            if args.metadata_out:
+                # Saving mode: write a formatted '<name>_metadata.txt' per file and
+                # print a short confirmation per file instead of the full dump (the
+                # dump itself is now sitting in each output file).
+                results = export_metadata_text(files, out_dir=args.metadata_out)
+                ok = sum(1 for _f, out_path, err in results if out_path)
+                for f, out_path, err in results:
+                    if out_path:
+                        _print_safe(f"Saved: {out_path}")
+                    else:
+                        _print_safe(f"[Skipped] {f}: {err}")
+                _print_safe(f"\n{ok} of {len(results)} file(s) saved to {os.path.abspath(args.metadata_out)}")
+            else:
+                for f in files:
+                    _print_safe(f"\n===== {f} =====")
+                    tree_text, _raw = get_full_metadata_text(f)
+                    _print_safe(tree_text if tree_text is not None else "  [No Tag 270 metadata found in this TIFF]")
+            sys.exit(0)
+
         if args.output and len(files) == 1:
             convert_file(files[0], args.output, scalebar=args.scalebar, markers=args.markers,
                          metadata_ext=args.metadata, output_format=args.format)

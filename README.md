@@ -41,6 +41,8 @@ JEOL SightSky TIFF画像(JEOL独自のXMLメタデータが埋め込まれたTIF
   (最初のファイルと同じフォルダに出力)が生成されます。
 - **USAGE**・**ABOUT** ボタンからアプリ内のヘルプ・サードパーティライセンス情報を確認できます。右上の
   日本語/Englishボタンでいつでも表示言語を切り替えられます。
+- **メタデータを見る** ボタンから、キュー内のファイルが持つJEOLメタデータの全項目(変換に使われる項目だけで
+  なく)を確認できます。**保存...**/**すべて保存...** で整形済みテキスト(`.txt`)として書き出せます。
 
 **コマンドラインで使う場合**
 
@@ -52,6 +54,12 @@ python convert_jeol_to_dm.py /path/to/image.tif
 
 # 複数ファイル・フォルダをまとめて変換(フォルダは再帰的に走査)
 python convert_jeol_to_dm.py /path/to/image1.tif /path/to/a_directory /path/to/image2.tif --format dm4 --markers --metadata
+
+# 変換せずにJEOLメタデータの全項目を表示
+python convert_jeol_to_dm.py /path/to/image.tif --show-metadata
+
+# ...または整形済みテキストファイルとして出力
+python convert_jeol_to_dm.py /path/to/image1.tif /path/to/image2.tif --metadata-out /path/to/output_dir
 ```
 
 コンパイル済みバイナリも同じフラグを受け付けます(GUIを介さないスクリプト・バッチ処理向け):
@@ -118,6 +126,8 @@ persistent GUI window — no command line required. This is how most people will
   the first source file) follow once it finishes.
 - **USAGE** and **ABOUT** open in-app help and third-party license info. The 日本語/English button in the top
   right toggles the UI language at any time.
+- **View Metadata** shows every JEOL metadata field for the queued files (not just the ones used for
+  conversion). **Save...**/**Save All...** export it as formatted `.txt` file(s).
 
 **Using the command line**
 
@@ -129,6 +139,12 @@ python convert_jeol_to_dm.py /path/to/image.tif
 
 # Convert multiple files and/or whole directories in one call (directories are scanned recursively)
 python convert_jeol_to_dm.py /path/to/image1.tif /path/to/a_directory /path/to/image2.tif --format dm4 --markers --metadata
+
+# Print every field in the JEOL metadata for a file instead of converting it
+python convert_jeol_to_dm.py /path/to/image.tif --show-metadata
+
+# ...or write it out as a formatted .txt per file instead of printing it
+python convert_jeol_to_dm.py /path/to/image1.tif /path/to/image2.tif --metadata-out /path/to/output_dir
 ```
 
 The compiled binary accepts the same flags (useful for scripting/batch jobs where you don't want the GUI):
